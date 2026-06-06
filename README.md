@@ -1,10 +1,22 @@
-# 🌤️ WEATHER MONITOR & ALERT SYSTEM — REALTIME
+# 🚀 Crypto Monitor & Alert System
 
-> **BT5 — Docker Compose | Node-RED | InfluxDB | MariaDB | Grafana | Flask | Nginx | Telegram Bot**
+<div align="center">
+
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
+![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=mariadb&logoColor=white)
+![InfluxDB](https://img.shields.io/badge/InfluxDB-22ADF6?style=for-the-badge&logo=influxdb&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white)
+![Node-RED](https://img.shields.io/badge/Node--RED-8F0000?style=for-the-badge&logo=node-red&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
+
+**Hệ thống theo dõi giá crypto realtime với cảnh báo tự động qua Telegram**
+
+</div>
 
 ---
 
-## 📌 MỤC LỤC
+# 📌 MỤC LỤC
 
 1. [Lý thuyết Docker](#1-lý-thuyết-docker)
    - [Docker là gì?](#11-docker-là-gì)
@@ -26,15 +38,13 @@
 
 ---
 
-## 1. LÝ THUYẾT DOCKER
+# 1. LÝ THUYẾT DOCKER
 
-### 1.1 Docker là gì?
+## 1.1 Docker là gì?
 
 **Docker** là nền tảng mã nguồn mở cho phép đóng gói ứng dụng cùng toàn bộ dependencies (thư viện, cấu hình, môi trường chạy) vào một đơn vị gọi là **container**.
 
 > 📦 Hãy tưởng tượng container như một chiếc hộp vận chuyển chuẩn hoá — bất kể nội dung bên trong là gì, nó luôn chạy đúng ở mọi nơi có Docker.
-
-<!-- [ẢNH: Sơ đồ so sánh VM vs Docker Container] -->
 
 **Các khái niệm cốt lõi:**
 
@@ -50,293 +60,51 @@
 
 ---
 
-### 1.2 Các keyword trong docker-compose.yml
+## 1.2 Các keyword trong `docker-compose.yml`
+
+| Keyword          | Ý nghĩa                                     | Ví dụ                          |
+| ---------------- | ------------------------------------------- | ------------------------------ |
+| `version`        | Chỉ định phiên bản schema của Compose file  | `version: "3.8"`               |
+| `services`       | Khối chứa định nghĩa các service/container  | `services: {web, db, api}`     |
+| `image`          | Chỉ định Docker image dùng để tạo container | `image: nginx:latest`          |
+| `build`          | Build image từ Dockerfile tùy chỉnh         | `build: ./flask-api`           |
+| `container_name` | Đặt tên cố định cho container               | `container_name: crypto_api`   |
+| `ports`          | Map cổng giữa host và container             | `"3000:3000"`                  |
+| `environment`    | Khai báo biến môi trường cho container      | `MYSQL_ROOT_PASSWORD=root`     |
+| `env_file`       | Nạp biến môi trường từ file `.env`          | `env_file: .env`               |
+| `volumes`        | Lưu trữ dữ liệu hoặc mount thư mục từ host  | `db_data:/var/lib/mysql`       |
+| `networks`       | Kết nối các container vào cùng mạng         | `networks: [backend_net]`      |
+| `depends_on`     | Xác định thứ tự khởi động service           | `depends_on: [mariadb]`        |
+| `healthcheck`    | Kiểm tra trạng thái hoạt động của container | `curl http://localhost/health` |
+| `restart`        | Chính sách tự khởi động lại container       | `unless-stopped`               |
+| `command`        | Ghi đè lệnh CMD mặc định của image          | `command: python app.py`       |
+| `working_dir`    | Đặt thư mục làm việc trong container        | `working_dir: /app`            |
+| `labels`         | Gắn metadata cho container                  | `com.example.role=api`         |
+| `logging`        | Cấu hình lưu và xoay vòng log               | `max-size: 10m`                |
+| `profiles`       | Nhóm service để khởi động theo nhu cầu      | `profiles: [debug]`            |
+
+### Giá trị của `restart`
+
+| Giá trị          | Ý nghĩa                             |
+| ---------------- | ----------------------------------- |
+| `no`             | Không tự khởi động lại              |
+| `always`         | Luôn khởi động lại                  |
+| `on-failure`     | Chỉ khởi động lại khi lỗi           |
+| `unless-stopped` | Khởi động lại trừ khi dừng thủ công |
+
+## 1.3 Ưu điểm khi triển khai ứng dụng bằng Docker
+
+| Ưu điểm            | Mô tả                                                                        |
+| ------------------ | ---------------------------------------------------------------------------- |
+| ✅ Tính nhất quán   | Ứng dụng chạy giống nhau trên môi trường Development, Testing và Production  |
+| ✅ Cô lập hoàn toàn | Mỗi service hoạt động độc lập, không xung đột thư viện hoặc dependency       |
+| ✅ Triển khai nhanh | Chỉ cần `docker compose up -d` để khởi động toàn bộ hệ thống                 |
+| ✅ Scale dễ dàng    | Tăng số lượng container bằng cách nhân bản service                           |
+| ✅ Version control  | Dễ dàng quản lý và rollback phiên bản image                                  |
+| ✅ Nhẹ hơn máy ảo   | Chia sẻ kernel với host nên tiêu tốn ít tài nguyên hơn VM                    |
+| ✅ Hỗ trợ CI/CD     | Tích hợp thuận lợi với GitHub Actions, GitLab CI, Jenkins                    |
+| ✅ Môi trường sạch  | Xóa container là loại bỏ toàn bộ môi trường chạy, không để lại cấu hình thừa |
 
-File `docker-compose.yml` sử dụng cú pháp YAML để mô tả toàn bộ hệ thống multi-container.
-
----
-
-#### 🔑 `version`
-**Ý nghĩa:** Chỉ định phiên bản schema của Compose file.
-
-```yaml
-version: "3.8"
-```
-
----
-
-#### 🔑 `services`
-**Ý nghĩa:** Khối cha chứa định nghĩa tất cả các service (container) trong hệ thống.
-
-```yaml
-services:
-  web:
-    image: nginx
-  db:
-    image: mariadb
-```
-
----
-
-#### 🔑 `image`
-**Ý nghĩa:** Chỉ định Docker image sẽ dùng để tạo container (lấy từ Docker Hub hoặc local registry).
-
-```yaml
-services:
-  grafana:
-    image: grafana/grafana:10.0.0
-```
-
----
-
-#### 🔑 `build`
-**Ý nghĩa:** Chỉ định đường dẫn chứa `Dockerfile` để build image tuỳ chỉnh thay vì dùng image có sẵn.
-
-```yaml
-services:
-  api:
-    build:
-      context: ./flask-api
-      dockerfile: Dockerfile
-```
-
----
-
-#### 🔑 `container_name`
-**Ý nghĩa:** Đặt tên cụ thể cho container (thay vì tên tự động). Tiện dùng khi `docker exec` hoặc log.
-
-```yaml
-services:
-  nodered:
-    container_name: weather_nodered
-```
-
----
-
-#### 🔑 `ports`
-**Ý nghĩa:** Map cổng giữa host và container theo dạng `"HOST:CONTAINER"`.
-
-```yaml
-services:
-  grafana:
-    ports:
-      - "3000:3000"   # truy cập http://localhost:3000
-```
-
----
-
-#### 🔑 `environment`
-**Ý nghĩa:** Truyền biến môi trường vào container (credentials, config, flags).
-
-```yaml
-services:
-  mariadb:
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: weather_db
-      MYSQL_USER: weather_user
-      MYSQL_PASSWORD: weather123
-```
-
----
-
-#### 🔑 `env_file`
-**Ý nghĩa:** Load biến môi trường từ file `.env` ngoài thay vì viết thẳng vào compose file (bảo mật hơn).
-
-```yaml
-services:
-  api:
-    env_file:
-      - .env
-```
-
----
-
-#### 🔑 `volumes`
-**Ý nghĩa:** Mount volume vào container — gồm 2 loại:
-- **Named volume:** `volume_name:/path` — Docker quản lý
-- **Bind mount:** `./host/path:/container/path` — mount trực tiếp thư mục host
-
-```yaml
-services:
-  influxdb:
-    volumes:
-      - influxdb_data:/var/lib/influxdb2       # named volume
-      - ./influxdb/config:/etc/influxdb2       # bind mount
-
-volumes:
-  influxdb_data:    # khai báo named volume ở đây
-```
-
----
-
-#### 🔑 `networks`
-**Ý nghĩa:** Định nghĩa mạng ảo nội bộ để các container giao tiếp với nhau theo tên service.
-
-```yaml
-services:
-  nodered:
-    networks:
-      - backend_net
-  mariadb:
-    networks:
-      - backend_net
-
-networks:
-  backend_net:
-    driver: bridge
-```
-
-> 💡 Trong cùng network, container gọi nhau bằng **tên service**, VD: `mariadb:3306`
-
----
-
-#### 🔑 `depends_on`
-**Ý nghĩa:** Xác định thứ tự khởi động — service này chỉ start sau khi service kia đã start.
-
-```yaml
-services:
-  api:
-    depends_on:
-      - mariadb
-      - influxdb
-```
-
-> ⚠️ `depends_on` chỉ đợi container **start**, không đợi service bên trong **sẵn sàng** (dùng healthcheck để chắc chắn hơn).
-
----
-
-#### 🔑 `healthcheck`
-**Ý nghĩa:** Định nghĩa lệnh kiểm tra sức khoẻ của container.
-
-```yaml
-services:
-  mariadb:
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-```
-
----
-
-#### 🔑 `restart`
-**Ý nghĩa:** Chính sách tự khởi động lại khi container bị crash.
-
-| Giá trị | Ý nghĩa |
-|---------|---------|
-| `no` | Không tự restart |
-| `always` | Luôn restart |
-| `on-failure` | Restart khi exit code khác 0 |
-| `unless-stopped` | Restart trừ khi bị dừng thủ công |
-
-```yaml
-services:
-  nodered:
-    restart: unless-stopped
-```
-
----
-
-#### 🔑 `command`
-**Ý nghĩa:** Ghi đè lệnh mặc định (CMD) được định nghĩa trong Dockerfile.
-
-```yaml
-services:
-  flask_api:
-    command: ["python", "app.py", "--host=0.0.0.0"]
-```
-
----
-
-#### 🔑 `working_dir`
-**Ý nghĩa:** Đặt thư mục làm việc bên trong container.
-
-```yaml
-services:
-  api:
-    working_dir: /app
-```
-
----
-
-#### 🔑 `labels`
-**Ý nghĩa:** Gắn metadata (nhãn) vào container/image/network — dùng để phân loại, quản lý, hoặc tích hợp tool như Traefik.
-
-```yaml
-services:
-  nginx:
-    labels:
-      - "com.example.role=webserver"
-      - "com.example.version=1.0"
-```
-
----
-
-#### 🔑 `logging`
-**Ý nghĩa:** Cấu hình driver và tuỳ chọn ghi log của container.
-
-```yaml
-services:
-  nodered:
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-```
-
----
-
-#### 🔑 `profiles`
-**Ý nghĩa:** Gom service vào nhóm — chỉ khởi động khi profile đó được chỉ định.
-
-```yaml
-services:
-  debug_tool:
-    profiles: ["debug"]
-```
-
-```bash
-docker compose --profile debug up
-```
-
----
-
-### 1.3 Ưu điểm khi triển khai app bằng Docker
-
-<!-- [ẢNH: Infographic Docker benefits] -->
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│              ƯU ĐIỂM CỦA DOCKER                            │
-├──────────────────────┬──────────────────────────────────────┤
-│ ✅ Tính nhất quán    │ "Works on my machine" → chạy đúng   │
-│                      │ ở mọi môi trường (dev/staging/prod) │
-├──────────────────────┼──────────────────────────────────────┤
-│ ✅ Cô lập hoàn toàn  │ Mỗi service chạy độc lập, không     │
-│                      │ xung đột dependency với nhau        │
-├──────────────────────┼──────────────────────────────────────┤
-│ ✅ Triển khai nhanh  │ docker compose up -d → toàn bộ     │
-│                      │ stack chạy trong vài giây           │
-├──────────────────────┼──────────────────────────────────────┤
-│ ✅ Scale dễ dàng     │ docker compose scale api=3 tăng     │
-│                      │ số instance ngay lập tức            │
-├──────────────────────┼──────────────────────────────────────┤
-│ ✅ Version control   │ Image được tag version → rollback   │
-│                      │ về phiên bản cũ dễ dàng             │
-├──────────────────────┼──────────────────────────────────────┤
-│ ✅ Nhẹ hơn VM        │ Container share kernel với host,    │
-│                      │ khởi động ms thay vì phút như VM    │
-├──────────────────────┼──────────────────────────────────────┤
-│ ✅ CI/CD thân thiện  │ Tích hợp pipeline build/test/deploy │
-│                      │ tự động với GitHub Actions, Jenkins │
-├──────────────────────┼──────────────────────────────────────┤
-│ ✅ Môi trường sạch   │ Xoá container là sạch hoàn toàn,    │
-│                      │ không rác thải hệ thống             │
-└──────────────────────┴──────────────────────────────────────┘
-```
 
 ---
 
@@ -424,799 +192,820 @@ curl http://localhost:5000/api/weather  # Flask API
 
 ---
 
-## 2. TỔNG QUAN HỆ THỐNG
 
-Hệ thống **Weather Monitor & Alert** là ứng dụng giám sát thời tiết realtime với khả năng cảnh báo tự động qua Telegram khi dữ liệu vượt ngưỡng cho phép.
-
-<!-- [ẢNH: Screenshot giao diện tổng quan web app] -->
+# 2. TỔNG QUAN HỆ THỐNG
 
 **Luồng dữ liệu chính:**
+```mermaid
+flowchart TB
 
-```
-OpenWeatherMap API
-        │
-        ▼
-   [Node-RED]  ──── polling 60s ────
-        │
-        ├──────────────────────────▶ [MariaDB]    (giá trị tức thời)
-        │
-        └──────────────────────────▶ [InfluxDB]   (lịch sử time-series)
-                                              │
-                                              ▼
-                                         [Grafana]   (biểu đồ lịch sử)
-        │
-        ▼ (kiểm tra ngưỡng)
-   [Node-RED]
-        │
-        └──── nếu bất thường ────▶ [Telegram Bot] ──▶ Group Chat
-```
+    Internet([Internet])
+    CF[Cloudflare Edge<br/>monitor.nhukhiem.id.vn]
+    Tunnel[cloudflared<br/>Cloudflare Tunnel]
+    Nginx[nginx :80]
 
-```
-Người dùng (Browser)
-        │
-        ▼
-    [Nginx] ──▶ HTML/JS/CSS (frontend)
-                    │
-                    ├── iframe ──▶ [Grafana]
-                    └── AJAX  ──▶ [Flask API] ──▶ [MariaDB]
-```
+    Frontend[frontend :80<br/>Nginx + HTML]
+    Flask[flask-api :5000<br/>Flask + Gunicorn]
 
+    MariaDB[(MariaDB<br/>3306)]
+    InfluxDB[(InfluxDB<br/>8086)]
+    Grafana[Grafana<br/>3000]
+
+    NodeRed[Node-RED<br/>1880]
+
+    Binance[Binance WebSocket<br/>BTCUSDT<br/>ETHUSDT<br/>SOLUSDT]
+
+    Telegram[Telegram Bot API<br/>Group Chat]
+
+    Internet --> CF
+    CF -->|HTTPS| Tunnel
+    Tunnel -->|HTTP| Nginx
+
+    Nginx -->|/| Frontend
+    Nginx -->|/api| Flask
+    Nginx -->|/grafana| Grafana
+    Nginx -->|/nodered| NodeRed
+
+    Flask --> MariaDB
+    Flask --> InfluxDB
+    Flask --> Grafana
+
+    Binance --> NodeRed
+
+    NodeRed --> MariaDB
+    NodeRed --> InfluxDB
+
+    NodeRed -->|Alert| Telegram
+```
 ---
 
-## 3. KIẾN TRÚC HỆ THỐNG
-
-<!-- [ẢNH: Sơ đồ kiến trúc hệ thống với các mũi tên kết nối] -->
-
-| Service | Image | Port | Vai trò |
-|---------|-------|------|---------|
-| **Node-RED** | `nodered/node-red:latest` | 1880 | Thu thập & xử lý dữ liệu |
-| **MariaDB** | `mariadb:10.11` | 3306 | Lưu giá trị tức thời |
-| **InfluxDB** | `influxdb:2.7` | 8086 | Lưu lịch sử time-series |
-| **Grafana** | `grafana/grafana:10.0.0` | 3000 | Trực quan hoá biểu đồ |
-| **Flask API** | `python:3.11-slim` (build) | 5000 | REST API trung gian |
-| **Nginx** | `nginx:alpine` | 80 | Web server & reverse proxy |
-
----
-
-## 4. YÊU CẦU HỆ THỐNG
-
-| Thành phần | Phiên bản tối thiểu |
-|-----------|---------------------|
-| Docker Engine | 24.0+ |
-| Docker Compose | 2.20+ |
-| RAM | 4 GB (khuyến nghị 8 GB) |
-| Disk | 10 GB trống |
-| OS | Ubuntu 20.04+ / Windows 10 (WSL2) / macOS 12+ |
-
-**Lấy API Key thời tiết (miễn phí):**
-
-1. Đăng ký tại [https://openweathermap.org](https://openweathermap.org)
-2. Vào `My API Keys` → Copy key
-3. Free tier: 60 calls/minute — đủ dùng cho project này
-
----
-
-## 5. CẤU TRÚC THƯ MỤC
+## 📁 Cấu trúc thư mục
 
 ```
-weather-monitor/
-│
-├── docker-compose.yml          # Định nghĩa toàn bộ stack
-├── .env                        # Biến môi trường (KHÔNG commit git)
-├── .env.example                # Template biến môi trường
+crypto-monitor/
+├── docker-compose.yml          # Orchestration chính
+├── .env                        # Biến môi trường (không commit)
+├── .env.example                # Template .env
+├── .gitignore
+├── README.md
+├── LICENSE
 │
 ├── nginx/
-│   ├── nginx.conf              # Cấu hình Nginx
-│   └── html/
-│       ├── index.html          # Frontend chính
-│       ├── style.css           # Giao diện
-│       └── app.js              # Logic AJAX/Socket
+│   ├── nginx.conf              # Nginx main config
+│   └── conf.d/
+│       └── default.conf        # Virtual host, reverse proxy
+│
+├── frontend/
+│   ├── Dockerfile
+│   ├── nginx-frontend.conf
+│   └── index.html              # Single-page dark dashboard
 │
 ├── flask-api/
 │   ├── Dockerfile
 │   ├── requirements.txt
-│   └── app.py                  # Flask REST API
-│
-├── nodered/
-│   └── flows.json              # Export flows Node-RED
+│   └── app.py                  # REST API endpoints
 │
 ├── mariadb/
-│   └── init.sql                # Script tạo bảng ban đầu
+│   └── init/
+│       └── 01_init.sql         # Schema initialization
 │
-├── influxdb/
-│   └── config/                 # Config InfluxDB
+├── influxdb/                   # (config auto-generated)
 │
-└── grafana/
-    ├── provisioning/
-    │   ├── datasources/
-    │   │   └── datasources.yml
-    │   └── dashboards/
-    │       ├── dashboards.yml
-    │       └── weather.json
-    └── dashboards/
+├── grafana/
+│   └── provisioning/
+│       ├── datasources/
+│       │   └── influxdb.yml    # Auto-configure datasource
+│       └── dashboards/
+│           ├── dashboard.yml
+│           └── crypto-main.json # Pre-built dashboard
+│
+├── nodered/
+│   └── flows.json              # Node-RED flow (Binance→DB→Telegram)
+│
+├── cloudflared/                # Tunnel config (nếu dùng file)
+│
+├── scripts/
+│   ├── backup.sh               # Backup volumes
+│   ├── restore.sh              # Restore volumes
+│   ├── save-images.sh          # Export Docker images
+│   └── load-images.sh          # Import Docker images
+│
+└── docs/
+    └── screenshots/            # Ảnh minh chứng
 ```
 
 ---
 
-## 6. CẤU HÌNH CHI TIẾT TỪNG SERVICE
+## 🐳 Docker Compose – Giải thích chi tiết
 
-### `docker-compose.yml`
+| Service | Image | Port | Vai trò |
+|---------|-------|------|---------|
+| `mariadb` | mariadb:10.11 | 3306 (internal) | Lưu giá realtime + alert history |
+| `influxdb` | influxdb:2.7 | 8086 (internal) | Time-series database lịch sử giá |
+| `grafana` | grafana/grafana:10.4.2 | 3000 (internal) | Dashboard & biểu đồ |
+| `nodered` | nodered/node-red:3.1.9 | 1880 (internal) | Thu thập Binance WS, xử lý, cảnh báo |
+| `flask-api` | custom build | 5000 (internal) | REST API |
+| `frontend` | custom build | 80 (internal) | Static web dashboard |
+| `nginx` | nginx:1.25-alpine | **80:80** | Reverse proxy, entry point |
+| `cloudflared` | cloudflare/cloudflared | — | Cloudflare Tunnel |
 
-```yaml
-version: "3.8"
+### Named Volumes
 
-networks:
-  weather_net:
-    driver: bridge
-
-volumes:
-  mariadb_data:
-  influxdb_data:
-  influxdb_config:
-  grafana_data:
-  nodered_data:
-
-services:
-
-  # ── NODE-RED ──────────────────────────────────────────────
-  nodered:
-    image: nodered/node-red:latest
-    container_name: weather_nodered
-    restart: unless-stopped
-    ports:
-      - "1880:1880"
-    environment:
-      - TZ=Asia/Ho_Chi_Minh
-    volumes:
-      - nodered_data:/data
-      - ./nodered/flows.json:/data/flows.json
-    networks:
-      - weather_net
-    depends_on:
-      mariadb:
-        condition: service_healthy
-      influxdb:
-        condition: service_healthy
-
-  # ── MARIADB ───────────────────────────────────────────────
-  mariadb:
-    image: mariadb:10.11
-    container_name: weather_mariadb
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    volumes:
-      - mariadb_data:/var/lib/mysql
-      - ./mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - weather_net
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ── INFLUXDB ──────────────────────────────────────────────
-  influxdb:
-    image: influxdb:2.7
-    container_name: weather_influxdb
-    restart: unless-stopped
-    ports:
-      - "8086:8086"
-    environment:
-      DOCKER_INFLUXDB_INIT_MODE: setup
-      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUXDB_USER}
-      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUXDB_PASSWORD}
-      DOCKER_INFLUXDB_INIT_ORG: ${INFLUXDB_ORG}
-      DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUXDB_BUCKET}
-      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_TOKEN}
-    volumes:
-      - influxdb_data:/var/lib/influxdb2
-      - influxdb_config:/etc/influxdb2
-    networks:
-      - weather_net
-    healthcheck:
-      test: ["CMD", "influx", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ── GRAFANA ───────────────────────────────────────────────
-  grafana:
-    image: grafana/grafana:10.0.0
-    container_name: weather_grafana
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
-      GF_AUTH_ANONYMOUS_ENABLED: "true"
-      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
-      GF_SECURITY_ALLOW_EMBEDDING: "true"
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-    networks:
-      - weather_net
-    depends_on:
-      - influxdb
-
-  # ── FLASK API ─────────────────────────────────────────────
-  flask_api:
-    build:
-      context: ./flask-api
-      dockerfile: Dockerfile
-    container_name: weather_flask_api
-    restart: unless-stopped
-    environment:
-      - DB_HOST=mariadb
-      - DB_PORT=3306
-      - DB_NAME=${MYSQL_DATABASE}
-      - DB_USER=${MYSQL_USER}
-      - DB_PASSWORD=${MYSQL_PASSWORD}
-    networks:
-      - weather_net
-    depends_on:
-      mariadb:
-        condition: service_healthy
-
-  # ── NGINX ─────────────────────────────────────────────────
-  nginx:
-    image: nginx:alpine
-    container_name: weather_nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/html:/usr/share/nginx/html:ro
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    networks:
-      - weather_net
-    depends_on:
-      - flask_api
-      - grafana
-```
+| Volume | Dữ liệu |
+|--------|---------|
+| `crypto-mariadb-data` | Database files MariaDB |
+| `crypto-influxdb-data` | InfluxDB data |
+| `crypto-influxdb-config` | InfluxDB config |
+| `crypto-grafana-data` | Grafana dashboards, settings |
+| `crypto-nodered-data` | Node-RED flows, settings |
 
 ---
 
-### `.env` — Biến môi trường
+## ⚙️ Hướng dẫn cài đặt
 
-```env
-# MariaDB
-MYSQL_ROOT_PASSWORD=rootpassword123
-MYSQL_DATABASE=weather_db
-MYSQL_USER=weather_user
-MYSQL_PASSWORD=weather123
+### Yêu cầu hệ thống
 
-# InfluxDB
-INFLUXDB_USER=admin
-INFLUXDB_PASSWORD=influxpassword123
-INFLUXDB_ORG=weather_org
-INFLUXDB_BUCKET=weather_bucket
-INFLUXDB_TOKEN=my-super-secret-token-replace-this
+- Docker Engine >= 24.0
+- Docker Compose >= 2.20
+- RAM: tối thiểu 4GB
+- Disk: tối thiểu 20GB
 
-# Grafana
-GRAFANA_USER=admin
-GRAFANA_PASSWORD=grafanapassword123
-
-# OpenWeatherMap
-OWM_API_KEY=your_openweathermap_api_key_here
-OWM_CITY=Hai Phong
-OWM_UNITS=metric
-
-# Telegram Bot
-TELEGRAM_BOT_TOKEN=your_bot_token_here
-TELEGRAM_CHAT_ID=your_group_chat_id_here
-
-# Alert thresholds
-TEMP_MIN=15
-TEMP_MAX=38
-HUMIDITY_MIN=30
-HUMIDITY_MAX=90
-WIND_MAX=50
-```
-
----
-
-### `mariadb/init.sql` — Khởi tạo database
-
-```sql
-CREATE TABLE IF NOT EXISTS weather_current (
-    id          INT AUTO_INCREMENT PRIMARY KEY,
-    city        VARCHAR(100)   NOT NULL,
-    temperature DECIMAL(5,2),
-    feels_like  DECIMAL(5,2),
-    humidity    INT,
-    pressure    INT,
-    wind_speed  DECIMAL(5,2),
-    wind_dir    INT,
-    weather     VARCHAR(100),
-    icon        VARCHAR(20),
-    visibility  INT,
-    updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
-                         ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_city (city),
-    INDEX idx_updated (updated_at)
-);
-```
-
----
-
-### `flask-api/app.py` — REST API
-
-```python
-from flask import Flask, jsonify
-from flask_cors import CORS
-import pymysql, os
-from datetime import datetime
-
-app = Flask(__name__)
-CORS(app)
-
-def get_db():
-    return pymysql.connect(
-        host=os.environ['DB_HOST'],
-        port=int(os.environ.get('DB_PORT', 3306)),
-        user=os.environ['DB_USER'],
-        password=os.environ['DB_PASSWORD'],
-        database=os.environ['DB_NAME'],
-        cursorclass=pymysql.cursors.DictCursor
-    )
-
-@app.route('/api/weather', methods=['GET'])
-def get_current_weather():
-    try:
-        conn = get_db()
-        with conn.cursor() as cursor:
-            cursor.execute("""
-                SELECT city, temperature, feels_like, humidity,
-                       pressure, wind_speed, weather, icon,
-                       visibility, updated_at
-                FROM weather_current ORDER BY updated_at DESC LIMIT 1
-            """)
-            data = cursor.fetchone()
-        conn.close()
-        if data:
-            data['updated_at'] = data['updated_at'].strftime('%Y-%m-%d %H:%M:%S')
-            return jsonify({"status": "ok", "data": data})
-        return jsonify({"status": "no_data"}), 404
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-@app.route('/api/health')
-def health():
-    return jsonify({"status": "healthy", "time": datetime.now().isoformat()})
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-```
-
----
-
-### `nginx/nginx.conf`
-
-```nginx
-server {
-    listen 80;
-    root /usr/share/nginx/html;
-    index index.html;
-
-    gzip on;
-    gzip_types text/plain text/css application/javascript application/json;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # Proxy đến Flask API
-    location /api/ {
-        proxy_pass http://flask_api:5000/api/;
-        proxy_set_header Host $host;
-        add_header 'Access-Control-Allow-Origin' '*';
-    }
-
-    # Proxy Grafana để embed iframe cùng domain
-    location /grafana/ {
-        proxy_pass http://grafana:3000/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        rewrite ^/grafana/(.*) /$1 break;
-    }
-}
-```
-
----
-
-### `nginx/html/app.js` — Logic AJAX auto-refresh
-
-```javascript
-const API_URL = '/api/weather';
-const REFRESH_INTERVAL = 10000; // 10 giây
-
-const THRESHOLDS = {
-    temp:     { min: 15, max: 38 },
-    humidity: { min: 30, max: 90 },
-    wind:     { max: 50 }
-};
-
-async function fetchWeather() {
-    try {
-        const res = await fetch(API_URL, { headers: { 'Cache-Control': 'no-cache' } });
-        const result = await res.json();
-        if (result.status === 'ok') updateUI(result.data);
-    } catch (err) {
-        console.error('Lỗi lấy dữ liệu:', err);
-    }
-}
-
-function updateUI(data) {
-    document.getElementById('temperature').textContent = data.temperature.toFixed(1);
-    document.getElementById('humidity').textContent    = data.humidity;
-    document.getElementById('wind-speed').textContent  = data.wind_speed.toFixed(1);
-    document.getElementById('pressure').textContent    = data.pressure;
-    document.getElementById('last-update').textContent = 'Cập nhật: ' + data.updated_at;
-
-    checkAlert('alert-temp',     data.temperature, THRESHOLDS.temp);
-    checkAlert('alert-humidity', data.humidity,    THRESHOLDS.humidity);
-    checkAlert('alert-wind',     data.wind_speed,  THRESHOLDS.wind);
-}
-
-function checkAlert(badgeId, value, threshold) {
-    const badge = document.getElementById(badgeId);
-    if (!badge) return;
-    if (threshold.min !== undefined && value < threshold.min) {
-        badge.textContent = '⚠️ THẤP'; badge.className = 'alert-badge alert-low';
-    } else if (value > threshold.max) {
-        badge.textContent = '🔴 CAO';  badge.className = 'alert-badge alert-high';
-    } else {
-        badge.textContent = '✅ OK';   badge.className = 'alert-badge alert-ok';
-    }
-}
-
-fetchWeather();
-setInterval(fetchWeather, REFRESH_INTERVAL);
-```
-
----
-
-## 7. HƯỚNG DẪN CÀI ĐẶT & CHẠY
-
-**Bước 1: Clone project**
+### Bước 1: Clone repository
 
 ```bash
-git clone https://github.com/yourname/weather-monitor.git
-cd weather-monitor
+git clone https://github.com/yourusername/crypto-monitor.git
+cd crypto-monitor
 ```
 
-**Bước 2: Cấu hình biến môi trường**
+### Bước 2: Cấu hình môi trường
 
 ```bash
 cp .env.example .env
-nano .env    # Điền API key, passwords
+nano .env
 ```
 
-**Bước 3: Khởi động stack**
+Chỉnh sửa các giá trị bắt buộc:
+```env
+TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
+TELEGRAM_CHAT_ID=-1001234567890
+CLOUDFLARE_TUNNEL_TOKEN=your_tunnel_token_here
+```
+
+### Bước 3: Build và chạy
 
 ```bash
-docker compose up -d --build
+# Build các image custom
+docker compose build
+
+# Khởi động toàn bộ hệ thống
+docker compose up -d
+
+# Xem logs
 docker compose logs -f
 ```
 
-**Bước 4: Kiểm tra trạng thái**
+### Bước 4: Kiểm tra hệ thống
 
 ```bash
+# Danh sách containers
 docker compose ps
+
+# Kiểm tra health
+curl http://localhost/api/health
 ```
 
-```
-NAME                   STATUS          PORTS
-weather_nodered        Up (healthy)    0.0.0.0:1880->1880/tcp
-weather_mariadb        Up (healthy)    3306/tcp
-weather_influxdb       Up (healthy)    0.0.0.0:8086->8086/tcp
-weather_grafana        Up (healthy)    0.0.0.0:3000->3000/tcp
-weather_flask_api      Up              5000/tcp
-weather_nginx          Up              0.0.0.0:80->80/tcp
-```
+### Truy cập các dịch vụ
 
-**Bước 5: Truy cập các dịch vụ**
-
-| Dịch vụ | URL | Tài khoản |
+| Dịch vụ | URL | Credential |
 |---------|-----|-----------|
-| **Web App** | http://localhost | — |
-| **Node-RED** | http://localhost:1880 | — |
-| **Grafana** | http://localhost:3000 | admin / (xem .env) |
-| **InfluxDB UI** | http://localhost:8086 | admin / (xem .env) |
-| **API Test** | http://localhost/api/weather | — |
+| **Web Dashboard** | http://localhost | — |
+| **Grafana** | http://localhost/grafana | admin / (xem .env) |
+| **Node-RED** | http://localhost/nodered | — |
+| **Flask API** | http://localhost/api/health | — |
 
 ---
 
-## 8. CẤU HÌNH NODE-RED
+## 🤖 Cấu hình Telegram Bot
 
-<!-- [ẢNH: Screenshot Node-RED flow diagram] -->
+### Bước 1: Tạo Bot
 
-**Cài node packages cần thiết trong Node-RED:**
+1. Mở Telegram, tìm `@BotFather`
+2. Gửi `/newbot`
+3. Đặt tên: `CryptoMonitorBot`
+4. Đặt username: `your_crypto_monitor_bot`
+5. Lưu **Bot Token** nhận được
 
-```
-Manage Palette → Install:
-  node-red-node-mysql
-  node-red-contrib-influxdb
-  node-red-contrib-telegrambot
-```
+### Bước 2: Tạo Group và thêm bot
 
-**HTTP Request Node — gọi OpenWeatherMap:**
-```
-URL: https://api.openweathermap.org/data/2.5/weather
-     ?q=Hai Phong,VN&appid={OWM_API_KEY}&units=metric&lang=vi
-```
+1. Tạo Telegram Group mới
+2. Thêm bot vào group
+3. Thêm các member: Member 1, Member 2, User 1875746636
 
-**Function Node — Parse dữ liệu:**
+### Bước 3: Lấy Chat ID của Group
 
-```javascript
-const w = JSON.parse(msg.payload);
-msg.payload = {
-    city:        w.name,
-    temperature: w.main.temp,
-    feels_like:  w.main.feels_like,
-    humidity:    w.main.humidity,
-    pressure:    w.main.pressure,
-    wind_speed:  w.wind.speed * 3.6,   // m/s → km/h
-    wind_dir:    w.wind.deg,
-    weather:     w.weather[0].description,
-    icon:        w.weather[0].icon,
-    visibility:  w.visibility
-};
-return msg;
+```bash
+# Gửi một tin nhắn vào group, sau đó chạy:
+curl "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates"
+# Tìm "chat": {"id": -1001234567890, ...}
 ```
 
-**MySQL Node — Ghi vào MariaDB:**
+### Bước 4: Cập nhật .env
 
-```sql
-INSERT INTO weather_current
-  (city, temperature, feels_like, humidity, pressure,
-   wind_speed, wind_dir, weather, icon, visibility)
-VALUES
-  ('{payload.city}', {payload.temperature}, {payload.feels_like},
-   {payload.humidity}, {payload.pressure}, {payload.wind_speed},
-   {payload.wind_dir}, '{payload.weather}', '{payload.icon}', {payload.visibility})
-ON DUPLICATE KEY UPDATE
-  temperature = VALUES(temperature), humidity = VALUES(humidity),
-  wind_speed  = VALUES(wind_speed),  weather  = VALUES(weather),
-  updated_at  = CURRENT_TIMESTAMP;
+```env
+TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
+TELEGRAM_CHAT_ID=-1001234567890
 ```
 
-**Function Node — Format cho InfluxDB:**
+### Mẫu tin nhắn alert
 
-```javascript
-msg.payload = [{
-    measurement: "weather",
-    tags: { city: msg.payload.city },
-    fields: {
-        temperature: msg.payload.temperature,
-        humidity:    msg.payload.humidity,
-        wind_speed:  msg.payload.wind_speed,
-        pressure:    msg.payload.pressure
-    }
-}];
-return msg;
+```
+🔴 ALERT HIGH
+
+Coin: BTCUSDT
+Price: 120500 USD
+Threshold: 120000 USD
+Time: 2026-06-20 20:15:30
+```
+
+```
+🔵 ALERT LOW
+
+Coin: BTCUSDT
+Price: 99500 USD
+Threshold: 100000 USD
+Time: 2026-06-20 20:15:30
 ```
 
 ---
 
-## 9. CẤU HÌNH GRAFANA
+## 📊 Hướng dẫn cấu hình Grafana
 
-<!-- [ẢNH: Screenshot Grafana dashboard với biểu đồ nhiệt độ] -->
+### Truy cập Grafana
 
-**Auto-provisioning datasource** (`grafana/provisioning/datasources/datasources.yml`):
+```
+URL: http://localhost/grafana
+Username: admin
+Password: (giá trị GRAFANA_ADMIN_PASSWORD trong .env)
+```
 
+### Datasource (tự động provisioned)
+
+Datasource **InfluxDB-Crypto** đã được tự động cấu hình qua file `grafana/provisioning/datasources/influxdb.yml`.
+
+Kiểm tra: **Configuration → Data Sources → InfluxDB-Crypto → Test**
+
+### Dashboard
+
+Dashboard **Crypto Monitor** (`uid: crypto-main`) đã được provisioned với 3 panels:
+- BTC/USDT Price (line chart, màu vàng)
+- ETH/USDT Price (line chart, màu xanh tím)
+- SOL/USDT Price (line chart, màu tím)
+
+### Cấu hình iframe trong frontend
+
+Dashboard được nhúng vào frontend qua iframe:
+```
+http://<host>:3000/d/crypto-main/crypto-monitor?orgId=1&refresh=5s&from=now-1h&to=now&theme=dark&kiosk
+```
+
+Để cho phép embedding, đã cấu hình trong docker-compose.yml:
 ```yaml
-apiVersion: 1
-datasources:
-  - name: InfluxDB_Weather
-    type: influxdb
-    access: proxy
-    url: http://influxdb:8086
-    jsonData:
-      version: Flux
-      organization: weather_org
-      defaultBucket: weather_bucket
-    secureJsonData:
-      token: my-super-secret-token-replace-this
-    isDefault: true
-```
-
-**Query Flux — Nhiệt độ 24 giờ:**
-
-```flux
-from(bucket: "weather_bucket")
-  |> range(start: -24h)
-  |> filter(fn: (r) => r._measurement == "weather")
-  |> filter(fn: (r) => r._field == "temperature")
-  |> aggregateWindow(every: 10m, fn: mean, createEmpty: false)
-```
-
-**Nhúng Grafana vào web qua iframe:**
-
-```html
-<iframe
-  src="http://localhost:3000/d/weather-dashboard/weather
-       ?orgId=1&refresh=30s&from=now-24h&to=now&kiosk=tv"
-  width="100%" height="500" frameborder="0">
-</iframe>
+GF_SECURITY_ALLOW_EMBEDDING: "true"
+GF_AUTH_ANONYMOUS_ENABLED: "true"
+GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
 ```
 
 ---
 
-## 10. CẤU HÌNH TELEGRAM ALERT BOT
+## 🔄 Hướng dẫn Node-RED
 
-<!-- [ẢNH: Screenshot tin nhắn alert trong Telegram group] -->
+### Truy cập
 
-**Tạo Bot:**
-1. Nhắn [@BotFather](https://t.me/BotFather) → `/newbot` → nhận **Bot Token**
-2. Thêm bot vào group chat (đã có thành viên + thêm `1875746636`)
-3. Lấy Chat ID: `https://api.telegram.org/bot{TOKEN}/getUpdates`
+```
+URL: http://localhost/nodered
+```
 
-**Node-RED — Function Node gửi Telegram khi có cảnh báo:**
+### Cài đặt nodes cần thiết
 
-```javascript
-const THRESHOLDS = {
-    temperature: { min: 15, max: 38 },
-    humidity:    { min: 30, max: 90 },
-    wind_speed:  { max: 50 }
-};
+Trong Node-RED UI → **Manage palette → Install**:
 
-const d = msg.payload;
-const alerts = [];
-const now = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+```
+node-red-node-mysql
+node-red-contrib-influxdb
+```
 
-if (d.temperature > THRESHOLDS.temperature.max)
-    alerts.push(`🔴 NHIỆT ĐỘ QUÁ CAO: ${d.temperature}°C (max: ${THRESHOLDS.temperature.max}°C)`);
-else if (d.temperature < THRESHOLDS.temperature.min)
-    alerts.push(`🔵 NHIỆT ĐỘ QUÁ THẤP: ${d.temperature}°C (min: ${THRESHOLDS.temperature.min}°C)`);
+### Import flow
 
-if (d.humidity > THRESHOLDS.humidity.max)
-    alerts.push(`💧 ĐỘ ẨM QUÁ CAO: ${d.humidity}% (max: ${THRESHOLDS.humidity.max}%)`);
-else if (d.humidity < THRESHOLDS.humidity.min)
-    alerts.push(`🏜️ ĐỘ ẨM QUÁ THẤP: ${d.humidity}% (min: ${THRESHOLDS.humidity.min}%)`);
+1. Vào Node-RED → **Menu (≡) → Import**
+2. Chọn file `nodered/flows.json`
+3. Click **Import**
 
-if (d.wind_speed > THRESHOLDS.wind_speed.max)
-    alerts.push(`💨 GIÓ QUÁ MẠNH: ${d.wind_speed.toFixed(1)} km/h (max: ${THRESHOLDS.wind_speed.max} km/h)`);
+### Cấu hình credentials
 
-if (alerts.length > 0) {
-    msg.payload = {
-        chatId:    process.env.TELEGRAM_CHAT_ID,
-        type:      'message',
-        parseMode: 'Markdown',
-        content: [
-            `⚠️ *CẢNH BÁO THỜI TIẾT BẤT THƯỜNG*`,
-            `📍 Địa điểm: *${d.city}*`,
-            `🕐 Thời gian: ${now}`,
-            ``,
-            ...alerts,
-            ``,
-            `📊 Chi tiết: cảm giác như ${d.feels_like}°C | áp suất ${d.pressure} hPa`
-        ].join('\n')
-    };
-    return msg;
+#### MariaDB node
+- Host: `mariadb`
+- Port: `3306`
+- Database: `cryptodb`
+- User: `cryptouser`
+- Password: (từ .env)
+
+#### InfluxDB node
+- URL: `http://influxdb:8086`
+- Token: (INFLUXDB_TOKEN từ .env)
+- Organization: `cryptoorg`
+- Bucket: `crypto_prices`
+
+### Flow hoạt động
+
+```
+[Binance WS BTC] ──┐
+[Binance WS ETH] ──┼──► [Parse] ──► [Check Threshold] ──► [Format Alert] ──► [Telegram]
+[Binance WS SOL] ──┘         │                              │
+                              ├──► [Save MariaDB]            └──► [Save Alert DB]
+                              └──► [Save InfluxDB]
+```
+
+### Ngưỡng cảnh báo
+
+| Coin | HIGH | LOW |
+|------|------|-----|
+| BTC  | > $120,000 | < $100,000 |
+| ETH  | > $7,000 | < $4,000 |
+| SOL  | > $300 | < $100 |
+
+---
+
+## ☁️ Hướng dẫn Cloudflare Tunnel
+
+### Bước 1: Tạo Tunnel trên Cloudflare
+
+1. Đăng nhập [dash.cloudflare.com](https://dash.cloudflare.com)
+2. **Zero Trust → Access → Tunnels → Create a tunnel**
+3. Đặt tên: `crypto-monitor`
+4. Lấy **Tunnel Token**
+
+### Bước 2: Cấu hình Public Hostname
+
+| Subdomain | Domain | Service |
+|-----------|--------|---------|
+| `monitor` | `nhukhiem.id.vn` | `http://nginx:80` |
+
+### Bước 3: Cập nhật .env
+
+```env
+CLOUDFLARE_TUNNEL_TOKEN=your_tunnel_token_here
+```
+
+### Bước 4: Khởi động lại
+
+```bash
+docker compose restart cloudflared
+```
+
+---
+
+## 📡 API Documentation
+
+Base URL: `http://localhost/api` hoặc `https://monitor.nhukhiem.id.vn/api`
+
+### GET /api/health
+
+Kiểm tra trạng thái hệ thống.
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "checks": {
+    "mariadb": "ok",
+    "influxdb": "ok"
+  },
+  "timestamp": "2026-06-20T20:15:30.000Z"
 }
-return null;  // Không gửi nếu bình thường
 ```
 
 ---
 
-## 11. LOGIC CẢNH BÁO BẤT THƯỜNG
+### GET /api/prices
 
-<!-- [ẢNH: Sơ đồ logic kiểm tra ngưỡng alert] -->
+Lấy giá realtime tất cả coins từ MariaDB.
 
-```
-       Giá trị đo được
-               │
-       ┌───────▼───────┐
-       │  value < MIN? │──YES──▶ 🔵 ALERT LOW  → Telegram
-       └───────┬───────┘
-               │ NO
-       ┌───────▼───────┐
-       │  value > MAX? │──YES──▶ 🔴 ALERT HIGH → Telegram
-       └───────┬───────┘
-               │ NO
-            ✅ OK — Không gửi
-```
-
-| Thông số | ALERT LOW | Vùng OK | ALERT HIGH |
-|----------|-----------|---------|------------|
-| Nhiệt độ | < 15°C | 15 – 38°C | > 38°C |
-| Độ ẩm | < 30% | 30 – 90% | > 90% |
-| Tốc độ gió | — | 0 – 50 km/h | > 50 km/h |
-| Áp suất | < 980 hPa | 980 – 1030 hPa | > 1030 hPa |
-
-**Ví dụ tin nhắn Telegram:**
-
-```
-⚠️ CẢNH BÁO THỜI TIẾT BẤT THƯỜNG
-📍 Địa điểm: Hai Phong
-🕐 Thời gian: 14/06/2025, 14:35:20
-
-🔴 NHIỆT ĐỘ QUÁ CAO: 39.2°C (max: 38°C)
-💧 ĐỘ ẨM QUÁ CAO: 93% (max: 90%)
-
-📊 Chi tiết: cảm giác như 42.1°C | áp suất 1008 hPa
+**Response:**
+```json
+{
+  "status": "ok",
+  "data": [
+    {
+      "symbol": "BTCUSDT",
+      "price": 105234.56,
+      "volume": 12345.67,
+      "updated_at": "2026-06-20T20:15:30.000"
+    }
+  ],
+  "timestamp": "2026-06-20T20:15:30.000Z"
+}
 ```
 
 ---
 
-## 12. TRIỂN KHAI OFFLINE LÊN MÁY CHỦ THẬT
+### GET /api/prices/{symbol}
 
-### Checklist triển khai:
+Lấy giá của một coin cụ thể.
 
-- [ ] Export toàn bộ Docker images: `docker save -o images_bundle.tar [images...]`
-- [ ] Nén: `tar -czf images_bundle.tar.gz images_bundle.tar`
-- [ ] Đóng gói source: `tar -czf weather_app.tar.gz docker-compose.yml .env nginx/ flask-api/ nodered/ grafana/`
-- [ ] Chuyển sang máy chủ qua USB / LAN nội bộ
-- [ ] Cài Docker Engine offline nếu cần
-- [ ] `docker load -i images_bundle.tar`
-- [ ] Chỉnh `.env` cho môi trường production
-- [ ] `docker compose up -d`
-- [ ] Kiểm tra `docker compose ps` và `docker compose logs`
-- [ ] Mở firewall port 80, 3000, 1880 nếu cần truy cập ngoài
+**Path params:** `symbol` = `BTCUSDT` | `ETHUSDT` | `SOLUSDT`
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "data": {
+    "symbol": "BTCUSDT",
+    "price": 105234.56,
+    "volume": 12345.67,
+    "updated_at": "2026-06-20T20:15:30.000"
+  }
+}
+```
 
 ---
 
-## 13. TROUBLESHOOTING
+### GET /api/history/{symbol}
 
-**Container không start:**
+Lấy lịch sử giá từ InfluxDB.
+
+**Path params:** `symbol` = `BTCUSDT` | `ETHUSDT` | `SOLUSDT`
+
+**Query params:** `range` = `5m` | `15m` | `1h` | `6h` | `24h` | `7d` (default: `1h`)
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "data": {
+    "symbol": "BTCUSDT",
+    "range": "1h",
+    "records": [
+      { "time": "2026-06-20T19:15:00+00:00", "price": 104980.00 }
+    ]
+  }
+}
+```
+
+---
+
+### GET /api/alerts
+
+Lấy lịch sử cảnh báo.
+
+**Query params:** `limit` = số lượng tối đa (default: 50, max: 200)
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "data": [
+    {
+      "id": 1,
+      "symbol": "BTCUSDT",
+      "alert_type": "HIGH",
+      "price": 120500.00,
+      "threshold": 120000.00,
+      "triggered_at": "2026-06-20T20:15:30.000",
+      "sent_ok": true
+    }
+  ]
+}
+```
+
+---
+
+### GET /api/system-status
+
+Lấy trạng thái toàn bộ hệ thống.
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "data": {
+    "mariadb":  { "status": "online", "records": 3 },
+    "influxdb": { "status": "online" },
+    "nodered":  { "status": "online" },
+    "grafana":  { "status": "online" },
+    "binance":  { "status": "online" }
+  }
+}
+```
+
+---
+
+## 💾 Backup & Restore
+
+### Export Docker Images (offline deployment)
+
 ```bash
-docker compose logs [service_name]
+# Script tự động
+bash scripts/save-images.sh
+
+# Hoặc thủ công
+docker save nginx:1.25-alpine mariadb:10.11 influxdb:2.7 \
+  grafana/grafana:10.4.2 nodered/node-red:3.1.9 \
+  cloudflare/cloudflared:latest \
+  -o crypto-images.tar
+
+# Nén
+gzip crypto-images.tar
+# → crypto-images.tar.gz
+```
+
+### Import Docker Images (server offline)
+
+```bash
+# Copy qua USB/SCP
+scp crypto-images.tar.gz user@server:/home/user/
+
+# Trên server
+gunzip crypto-images.tar.gz
+docker load -i crypto-images.tar
+
+# Build custom images
+docker compose build --no-cache
+
+# Chạy hệ thống
+docker compose up -d
+```
+
+### Export Container (snapshot)
+
+```bash
+# Export container thành tar
+docker export crypto-flask-api > flask-api-snapshot.tar
+
+# Import thành image
+docker import flask-api-snapshot.tar crypto-flask-api:backup
+```
+
+### Backup Volumes
+
+```bash
+# Backup MariaDB
+docker run --rm \
+  -v crypto-mariadb-data:/data \
+  -v $(pwd)/backups:/backup \
+  alpine tar czf /backup/mariadb-$(date +%Y%m%d_%H%M%S).tar.gz -C /data .
+
+# Backup InfluxDB
+docker run --rm \
+  -v crypto-influxdb-data:/data \
+  -v $(pwd)/backups:/backup \
+  alpine tar czf /backup/influxdb-$(date +%Y%m%d_%H%M%S).tar.gz -C /data .
+
+# Backup Grafana
+docker run --rm \
+  -v crypto-grafana-data:/data \
+  -v $(pwd)/backups:/backup \
+  alpine tar czf /backup/grafana-$(date +%Y%m%d_%H%M%S).tar.gz -C /data .
+
+# Backup Node-RED
+docker run --rm \
+  -v crypto-nodered-data:/data \
+  -v $(pwd)/backups:/backup \
+  alpine tar czf /backup/nodered-$(date +%Y%m%d_%H%M%S).tar.gz -C /data .
+```
+
+### Restore Volumes
+
+```bash
+# Stop services
+docker compose down
+
+# Restore MariaDB
+docker run --rm \
+  -v crypto-mariadb-data:/data \
+  -v $(pwd)/backups:/backup \
+  alpine sh -c "cd /data && tar xzf /backup/mariadb-TIMESTAMP.tar.gz"
+
+# Restore InfluxDB
+docker run --rm \
+  -v crypto-influxdb-data:/data \
+  -v $(pwd)/backups:/backup \
+  alpine sh -c "cd /data && tar xzf /backup/influxdb-TIMESTAMP.tar.gz"
+
+# Restore Grafana
+docker run --rm \
+  -v crypto-grafana-data:/data \
+  -v $(pwd)/backups:/backup \
+  alpine sh -c "cd /data && tar xzf /backup/grafana-TIMESTAMP.tar.gz"
+
+# Restore Node-RED
+docker run --rm \
+  -v crypto-nodered-data:/data \
+  -v $(pwd)/backups:/backup \
+  alpine sh -c "cd /data && tar xzf /backup/nodered-TIMESTAMP.tar.gz"
+
+# Khởi động lại
+docker compose up -d
+```
+
+### MariaDB SQL Backup (alternative)
+
+```bash
+# Dump
+docker exec crypto-mariadb sh -c \
+  "mysqldump -u root -p\$MYSQL_ROOT_PASSWORD cryptodb" \
+  > backups/cryptodb-$(date +%Y%m%d).sql
+
+# Restore
+docker exec -i crypto-mariadb sh -c \
+  "mysql -u root -p\$MYSQL_ROOT_PASSWORD cryptodb" \
+  < backups/cryptodb-20260620.sql
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### Container không khởi động được
+
+```bash
+# Xem logs chi tiết
+docker compose logs mariadb
+docker compose logs flask-api
+
+# Kiểm tra health
+docker inspect crypto-mariadb --format='{{.State.Health.Status}}'
+```
+
+### MariaDB connection refused
+
+```bash
+# Chờ MariaDB sẵn sàng
+docker compose logs mariadb | grep "ready for connections"
+
+# Reset và rebuild
+docker compose down
+docker volume rm crypto-mariadb-data
+docker compose up -d mariadb
+```
+
+### Node-RED không kết nối Binance WebSocket
+
+```bash
+# Kiểm tra network
+docker exec crypto-nodered curl -s https://api.binance.com/api/v3/ping
+
+# Xem Node-RED logs
+docker compose logs nodered -f
+```
+
+### Telegram không nhận alert
+
+```bash
+# Test thủ công
+curl -X POST "https://api.telegram.org/bot<TOKEN>/sendMessage" \
+  -d "chat_id=<CHAT_ID>&text=Test alert from CryptoMonitor"
+```
+
+### InfluxDB token error
+
+```bash
+# Lấy token mới
+docker exec crypto-influxdb influx auth list
+
+# Hoặc reset
+docker compose down
+docker volume rm crypto-influxdb-data crypto-influxdb-config
+docker compose up -d influxdb
+```
+
+### Grafana dashboard trống
+
+```bash
+# Kiểm tra datasource
+curl -u admin:admin http://localhost:3000/api/datasources
+
+# Kiểm tra InfluxDB có dữ liệu
+docker exec crypto-influxdb influx query \
+  --org cryptoorg \
+  --token $INFLUXDB_TOKEN \
+  'from(bucket:"crypto_prices") |> range(start: -5m) |> limit(n:5)'
+```
+
+### Lệnh hữu ích
+
+```bash
+# Xem tất cả containers
+docker compose ps -a
+
+# Restart một service
+docker compose restart flask-api
+
+# Xem resource usage
 docker stats
-docker compose restart nodered
-```
 
-**MariaDB không kết nối được:**
-```bash
-docker exec -it weather_nodered sh
-ping mariadb   # Test DNS resolution trong network
-```
+# Vào shell container
+docker exec -it crypto-mariadb mysql -u cryptouser -pcryptopass123 cryptodb
 
-**Grafana không hiển thị trong iframe:**
-```bash
-# Kiểm tra .env có đủ 2 dòng sau không:
-GF_SECURITY_ALLOW_EMBEDDING=true
-GF_AUTH_ANONYMOUS_ENABLED=true
-```
+# Stop toàn bộ
+docker compose down
 
-**Telegram Bot không gửi được:**
-```bash
-curl -X POST "https://api.telegram.org/bot{TOKEN}/sendMessage" \
-  -d "chat_id={CHAT_ID}&text=Test message"
-```
-
-**Reset toàn bộ (xoá dữ liệu):**
-```bash
-docker compose down -v        # Dừng và xoá volumes
-docker compose up -d --build  # Chạy lại từ đầu
+# Stop và xóa volumes (CẢNH BÁO: mất dữ liệu)
+docker compose down -v
 ```
 
 ---
 
-## 📎 TÀI LIỆU THAM KHẢO
+## 📸 Minh chứng quá trình (Screenshots)
 
-| Tài liệu | Link |
-|----------|------|
-| Docker Compose Reference | https://docs.docker.com/compose/compose-file/ |
-| Node-RED Documentation | https://nodered.org/docs/ |
-| OpenWeatherMap API | https://openweathermap.org/api |
-| InfluxDB Flux Query | https://docs.influxdata.com/flux/ |
-| Grafana Provisioning | https://grafana.com/docs/grafana/latest/administration/provisioning/ |
-| Telegram Bot API | https://core.telegram.org/bots/api |
+| STT | Tên ảnh | Mô tả | Mục đích |
+|-----|---------|-------|----------|
+| 01 | `01_install_docker.png` | Màn hình sau khi cài Docker Engine thành công, chạy `docker version` | Chứng minh môi trường Docker đã sẵn sàng |
+| 02 | `02_compose_up.png` | Output `docker compose up -d`, tất cả services started | Chứng minh deploy thành công |
+| 03 | `03_container_list.png` | Output `docker compose ps`, trạng thái healthy | Chứng minh các container đang chạy |
+| 04 | `04_nodered_flow.png` | Node-RED UI với flow đã import đầy đủ | Chứng minh Node-RED hoạt động |
+| 05 | `05_mariadb_data.png` | Query `SELECT * FROM realtime_prices` có dữ liệu thực | Chứng minh MariaDB lưu giá realtime |
+| 06 | `06_influxdb_data.png` | InfluxDB Explorer có time-series data crypto_price | Chứng minh InfluxDB lưu lịch sử |
+| 07 | `07_grafana_dashboard.png` | Dashboard với 3 biểu đồ BTC/ETH/SOL live | Chứng minh Grafana hiển thị dữ liệu |
+| 08 | `08_flask_api.png` | Browser/curl trả kết quả từ `/api/prices` | Chứng minh Flask API hoạt động |
+| 09 | `09_website_main.png` | Giao diện web dark theme với giá realtime | Chứng minh frontend hoạt động |
+| 10 | `10_telegram_alert.png` | Điện thoại nhận tin nhắn alert từ Telegram Bot | Chứng minh cảnh báo hoạt động |
+| 11 | `11_cloudflare_tunnel.png` | Cloudflare dashboard + trình duyệt mở domain | Chứng minh public access qua Cloudflare |
+| 12 | `12_docker_save.png` | Chạy `docker save` xuất file tar | Chứng minh export image |
+| 13 | `13_docker_load.png` | Chạy `docker load` nhập từ file tar | Chứng minh import image |
+| 14 | `14_docker_export.png` | Chạy `docker export` xuất container | Chứng minh export container |
+| 15 | `15_docker_import.png` | Chạy `docker import` tạo image từ container | Chứng minh import container |
+| 16 | `16_compose_down.png` | Output `docker compose down` | Chứng minh dừng hệ thống sạch |
+| 17 | `17_compose_up_restore.png` | `docker compose up -d` sau restore | Chứng minh khởi động lại thành công |
+| 18 | `18_restore_success.png` | Web + DB hoạt động đúng sau restore | Chứng minh dữ liệu được khôi phục |
 
 ---
 
-> 📝 **Lưu ý:** Các vị trí `<!-- [ẢNH: ...] -->` là nơi bạn chèn ảnh minh hoạ vào.
+## 📝 GitHub Repository
+
+### Cấu trúc
+
+```
+github.com/yourusername/crypto-monitor/
+├── .github/
+│   └── workflows/
+│       └── docker-build.yml    # CI/CD
+├── docs/
+│   └── screenshots/
+├── src/                        # Source code
+└── ...
+```
+
+### Commit Message Convention
+
+```bash
+# Phase 1: Khởi tạo project
+git commit -m "feat: initial project structure and docker-compose"
+git commit -m "feat: add MariaDB schema initialization"
+
+# Phase 2: Backend
+git commit -m "feat: implement Flask REST API with all endpoints"
+git commit -m "feat: add InfluxDB time-series integration"
+
+# Phase 3: Node-RED
+git commit -m "feat: add Node-RED flow for Binance WebSocket"
+git commit -m "feat: implement Telegram alert system"
+git commit -m "feat: add threshold checking for BTC/ETH/SOL"
+
+# Phase 4: Frontend
+git commit -m "feat: implement dark theme crypto dashboard"
+git commit -m "feat: add realtime price cards with auto-refresh"
+git commit -m "feat: integrate Grafana iframe for chart history"
+
+# Phase 5: Infrastructure
+git commit -m "feat: configure Nginx reverse proxy"
+git commit -m "feat: add Cloudflare Tunnel support"
+git commit -m "feat: add Grafana provisioning dashboards"
+
+# Phase 6: DevOps
+git commit -m "feat: add volume backup and restore scripts"
+git commit -m "feat: add docker save/load scripts for offline deploy"
+git commit -m "docs: complete README with full documentation"
+
+# Phase 7: Fixes
+git commit -m "fix: healthcheck timing for database dependencies"
+git commit -m "fix: Grafana embedding allow anonymous viewer"
+git commit -m "chore: update .gitignore, add LICENSE"
+```
 
 ---
 
-*README — BT5: Docker Compose | Weather Monitor & Alert Realtime*  
-*Tác giả: [Tên sinh viên] — [MSSV]*
+## 📄 License
+
+MIT License — xem file [LICENSE](LICENSE)
+
+---
+
+## 👥 Team
+
+Bài tập 5 — Docker Compose & Full Stack Deployment
+
+---
+
+<div align="center">
+Made with ❤️ using Docker, Flask, Node-RED, Grafana, and Binance WebSocket
+</div>
